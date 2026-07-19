@@ -129,10 +129,56 @@ if (pageTrackerDots.length && pageSections.length) {
   });
 }
 
-// REPO SIDEBAR LINKS
-document.querySelectorAll('#repoList li[data-url]').forEach(li => {
-  li.addEventListener('click', () => window.open(li.dataset.url, '_blank'));
-});
+// REPO SIDEBAR — fetched live from GitHub so it always reflects Sachi's real repos
+const LANGUAGE_COLORS = {
+  Python: '#3572A5', JavaScript: '#f1e05a', TypeScript: '#3178c6', HTML: '#e34c26',
+  CSS: '#563d7c', Java: '#b07219', 'Jupyter Notebook': '#DA5B0B', Dart: '#00B4AB',
+  'C++': '#f34b7d', C: '#555555', Go: '#00ADD8', Rust: '#dea584', Shell: '#89e051'
+};
+
+function timeAgo(dateStr) {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if (days < 1) return 'today';
+  if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
+  const years = Math.floor(months / 12);
+  return `${years} year${years > 1 ? 's' : ''} ago`;
+}
+
+async function loadRepos() {
+  const listEl = document.getElementById('repoList');
+  const countEl = document.getElementById('repoCount');
+  if (!listEl) return;
+
+  try {
+    const res = await fetch('https://api.github.com/users/Sachi1312/repos?per_page=100&sort=updated');
+    if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+    const repos = (await res.json()).filter(r => !r.fork);
+
+    countEl.textContent = repos.length;
+    listEl.innerHTML = '';
+
+    repos.forEach(repo => {
+      const li = document.createElement('li');
+      li.dataset.url = repo.html_url;
+      const dotColor = LANGUAGE_COLORS[repo.language] || '#8fa89b';
+      li.innerHTML = `
+        <span class="lang-dot" style="background:${dotColor}"></span>
+        <span class="repo-list-name">${repo.name}</span>
+        <span class="repo-list-time">${timeAgo(repo.updated_at)}</span>
+      `;
+      li.addEventListener('click', () => window.open(repo.html_url, '_blank'));
+      listEl.appendChild(li);
+    });
+  } catch (err) {
+    console.error('Failed to load repos from GitHub:', err);
+    listEl.innerHTML = `<li class="repo-list-loading">Couldn't load live data &mdash; <a href="https://github.com/Sachi1312" target="_blank" style="color:var(--green)">view on GitHub</a></li>`;
+    countEl.textContent = '?';
+  }
+}
+loadRepos();
 
 // CHATBOT
 const chatbot = document.getElementById('chatbot');

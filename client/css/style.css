@@ -437,6 +437,8 @@ footer{text-align:center;padding:40px 24px;border-top:1px solid var(--border);co
 .repo-list li:last-child{border-bottom:none;}
 .repo-list-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .repo-list-time{font-size:.68rem;color:var(--text-faint);flex-shrink:0;}
+.repo-list-loading{color:var(--text-faint);cursor:default;justify-content:center;}
+.repo-list-loading:hover{color:var(--text-faint);background:none;}
 .pinned-label{font-size:.72rem;color:var(--text-faint);letter-spacing:.1em;margin-bottom:16px;}
 .repo-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;text-decoration:none;}
 
